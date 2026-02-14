@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Wall</title>
+    <meta name="description" content="A public video wall. Upload videos, filter by tags, switch views." />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --bg: #000;
+        --fg: #fff;
+        --muted: rgba(255,255,255,.65);
+        --muted2: rgba(255,255,255,.45);
+        --border: rgba(255,255,255,.10);
+        --focus: rgba(255,255,255,.25);
+        --pill: rgba(255,255,255,.08);
+        --pill-active: rgba(255,255,255,.18);
+        --tag-longevity: #8ecda0;
+        --tag-longevity-bg: rgba(142,205,160,.15);
+        --tag-design: #8ab4f8;
+        --tag-design-bg: rgba(138,180,248,.15);
+        --tag-society: #f0c68a;
+        --tag-society-bg: rgba(240,198,138,.15);
+        --tag-service: #c4a6e8;
+        --tag-service-bg: rgba(196,166,232,.15);
+        --tag-system: #f0a0a0;
+        --tag-system-bg: rgba(240,160,160,.15);
+        --tag-technology: #8adcdc;
+        --tag-technology-bg: rgba(138,220,220,.15);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { min-height: 100%; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+
+      .header-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      h1 { font-size: 18px; font-weight: 600; letter-spacing: .15px; }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .toolbar-divider {
+        width: 1px;
+        height: 20px;
+        background: var(--border);
+        margin: 0 4px;
+      }
+
+      .icon-btn {
+        appearance: none;
+        border: none;
+        background: var(--pill);
+        color: var(--muted);
+        border-radius: 6px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+      }
+      .icon-btn:hover { background: var(--pill-active); color: var(--fg); }
+      .icon-btn.active { background: var(--pill-active); color: var(--fg); }
+      .icon-btn svg { width: 16px; height: 16px; }
+      .icon-btn-red { color: rgba(255,100,100,.75); }
+      .icon-btn-red:hover { color: rgba(255,100,100,1); background: rgba(255,60,60,.12); }
+
+      .pill {
+        appearance: none;
+        border: none;
+        background: var(--pill);
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+      }
+      .pill:hover { background: var(--pill-active); color: var(--fg); }
+      .pill.active { background: var(--pill-active); color: var(--fg); }
+
+      .pill-text {
+        appearance: none;
+        border: none;
+        background: var(--pill);
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+      }
+      .pill-text:hover { background: var(--pill-active); color: var(--fg); }
+      .pill-text.active { background: var(--pill-active); color: var(--fg); }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .filters .pill { font-size: 11px; padding: 5px 12px; font-weight: 500; }
+      .filters .pill[data-tag="longevity"] { background: var(--tag-longevity-bg); color: var(--tag-longevity); }
+      .filters .pill[data-tag="design"] { background: var(--tag-design-bg); color: var(--tag-design); }
+      .filters .pill[data-tag="society"] { background: var(--tag-society-bg); color: var(--tag-society); }
+      .filters .pill[data-tag="service"] { background: var(--tag-service-bg); color: var(--tag-service); }
+      .filters .pill[data-tag="system"] { background: var(--tag-system-bg); color: var(--tag-system); }
+      .filters .pill[data-tag="technology"] { background: var(--tag-technology-bg); color: var(--tag-technology); }
+      .filters .pill[data-tag].active { outline: 1.5px solid currentColor; outline-offset: -1.5px; }
+
+      .edit-panel {
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .edit-panel.open { display: flex; }
+
+      label {
+        display: block;
+        font-size: 11px;
+        color: var(--muted2);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      textarea {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        color-scheme: dark;
+      }
+      input[type="text"]:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus,
+      textarea:focus { border-color: var(--focus); }
+      textarea { min-height: 80px; resize: vertical; }
+
+      .file-input { font-size: 13px; color: var(--muted); }
+
+      .tag-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tag-pill {
+        appearance: none;
+        border: none;
+        border-radius: 999px;
+        padding: 5px 14px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+        font-weight: 500;
+      }
+      .tag-pill[data-tag="longevity"] { background: var(--tag-longevity-bg); color: var(--tag-longevity); }
+      .tag-pill[data-tag="design"] { background: var(--tag-design-bg); color: var(--tag-design); }
+      .tag-pill[data-tag="society"] { background: var(--tag-society-bg); color: var(--tag-society); }
+      .tag-pill[data-tag="service"] { background: var(--tag-service-bg); color: var(--tag-service); }
+      .tag-pill[data-tag="system"] { background: var(--tag-system-bg); color: var(--tag-system); }
+      .tag-pill[data-tag="technology"] { background: var(--tag-technology-bg); color: var(--tag-technology); }
+      .tag-pill.selected {
+        outline: 1.5px solid currentColor;
+        outline-offset: -1.5px;
+      }
+
+      .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn-upload {
+        appearance: none;
+        border: 1px solid rgba(255,255,255,.3);
+        background: rgba(255,255,255,.12);
+        color: var(--fg);
+        border-radius: 8px;
+        padding: 9px 22px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .3px;
+        cursor: pointer;
+        transition: background .15s, border-color .15s;
+      }
+      .btn-upload:disabled { opacity: .5; cursor: default; }
+      .btn-upload:hover:not(:disabled) { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.45); }
+
+      .btn-delete {
+        appearance: none;
+        border: 1px solid rgba(255,80,80,.25);
+        background: rgba(255,60,60,.08);
+        color: rgba(255,120,120,.9);
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        margin-top: 6px;
+      }
+      .btn-delete:hover { background: rgba(255,60,60,.18); }
+
+      .word-count {
+        font-size: 11px;
+        color: var(--muted2);
+      }
+
+      .status-msg {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: rgba(138,180,248,.8);
+        transition: width .3s;
+      }
+
+      .wall-single {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      .wall-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      @media (max-width: 740px) {
+        .wall-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 420px) {
+        .wall-grid { grid-template-columns: 1fr;  }
+      }
+
+      .card { padding: 0; }
+
+      .card video {
+        width: 100%;
+        display: block;
+        background: #000;
+        border-radius: 6px;
+      }
+
+      .card .meta {
+        padding: 10px 2px 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .card .tags-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 2px;
+      }
+      .card .tag {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 500;
+      }
+      .tag-longevity { background: var(--tag-longevity-bg); color: var(--tag-longevity); }
+      .tag-design { background: var(--tag-design-bg); color: var(--tag-design); }
+      .tag-society { background: var(--tag-society-bg); color: var(--tag-society); }
+      .tag-service { background: var(--tag-service-bg); color: var(--tag-service); }
+      .tag-system { background: var(--tag-system-bg); color: var(--tag-system); }
+      .tag-technology { background: var(--tag-technology-bg); color: var(--tag-technology); }
+
+      .card .meta-line {
+        font-size: 12px;
+        color: var(--muted2);
+      }
+
+      .card .insight-text {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+        line-height: 1.5;
+      }
+
+      .wall-grid .card .meta { padding: 5px 2px 2px; }
+      .wall-grid .card .meta-line { font-size: 9px; }
+      .wall-grid .card .tag { font-size: 8px; padding: 1px 6px; }
+      .wall-grid .card .insight-text { font-size: 10px; }
+
+      .empty-state {
+        padding: 24px 0;
+        color: var(--muted2);
+        font-size: 13px;
+      }
+
+      .separator {
+        height: 1px;
+        background: var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header-row">
+        <h1>Video Wall</h1>
+        <div class="toolbar">
+          <button class="pill-text" id="btnEdit">Upload</button>
+
+          <span class="toolbar-divider"></span>
+
+          <button class="icon-btn active" id="btnPreview" title="Single column">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="2" y="2" width="12" height="12" rx="1.5" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="btnGrid" title="Grid view">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="1.5" y="1.5" width="5" height="5" rx="1" />
+              <rect x="9.5" y="1.5" width="5" height="5" rx="1" />
+              <rect x="1.5" y="9.5" width="5" height="5" rx="1" />
+              <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="btnExport" title="Export CSV">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8" />
+              <polyline points="4 7 8 10 12 7" />
+              <path d="M2 13h12" />
+            </svg>
+          </button>
+          <button class="icon-btn icon-btn-red" id="btnRefresh" title="Reset wall">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="edit-panel" id="editPanel">
+        <div class="separator"></div>
+        <form id="uploadForm" style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label for="file">Video file (max 50MB)</label>
+            <input class="file-input" id="file" name="file" type="file" accept="video/*" required />
+          </div>
+          <div>
+            <label for="time">Time</label>
+            <input id="time" name="time" type="time" />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" />
+          </div>
+          <div>
+            <label for="location">Location</label>
+            <input id="location" name="location" type="text" placeholder="e.g. Brooklyn" />
+          </div>
+          <div>
+            <label for="insight">Insight <span class="word-count" id="wordCount">(0 / 350 words)</span></label>
+            <textarea id="insight" name="insight" placeholder="What happened? What did you notice?"></textarea>
+          </div>
+          <div>
+            <label>Tags</label>
+            <div class="tag-pills" id="tagPills">
+              <button type="button" class="tag-pill" data-tag="longevity">longevity</button>
+              <button type="button" class="tag-pill" data-tag="design">design</button>
+              <button type="button" class="tag-pill" data-tag="society">society</button>
+              <button type="button" class="tag-pill" data-tag="service">service</button>
+              <button type="button" class="tag-pill" data-tag="system">system</button>
+              <button type="button" class="tag-pill" data-tag="technology">technology</button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-upload" id="submitBtn" type="submit">Upload</button>
+            <span class="status-msg" id="status"></span>
+          </div>
+          <div class="progress-bar" id="progressBar" style="display:none;">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </form>
+        <div class="separator"></div>
+      </div>
+
+      <div class="filters" id="filtersBar">
+        <button class="pill active" data-tag="all">All</button>
+        <button class="pill" data-tag="longevity">longevity</button>
+        <button class="pill" data-tag="design">design</button>
+        <button class="pill" data-tag="society">society</button>
+        <button class="pill" data-tag="service">service</button>
+        <button class="pill" data-tag="system">system</button>
+        <button class="pill" data-tag="technology">technology</button>
+        <button class="pill" id="btnClearFilter" style="display:none;">Clear filter</button>
+      </div>
+
+      <div id="wall"></div>
+    </div>
+
+    <script>
+      // Initialize Supabase
+      const SUPABASE_URL = 'https://acjtqcvqoqlwstpurnnt.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjanRxY3Zxb3Fsd3N0cHVybm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTQ0MTksImV4cCI6MjA4NjU3MDQxOX0.ulDc5xjs68zAXaIfM8nP1tWyobRKaI61FBf1IPrhyXM';
+      
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const wallEl = document.getElementById('wall');
+      const formEl = document.getElementById('uploadForm');
+      const statusEl = document.getElementById('status');
+      const submitBtn = document.getElementById('submitBtn');
+      const editPanel = document.getElementById('editPanel');
+      const btnEdit = document.getElementById('btnEdit');
+      const btnPreview = document.getElementById('btnPreview');
+      const btnGrid = document.getElementById('btnGrid');
+      const btnRefresh = document.getElementById('btnRefresh');
+      const btnExport = document.getElementById('btnExport');
+      const filtersBar = document.getElementById('filtersBar');
+      const btnClearFilter = document.getElementById('btnClearFilter');
+      const insightEl = document.getElementById('insight');
+      const wordCountEl = document.getElementById('wordCount');
+      const tagPillsEl = document.getElementById('tagPills');
+      const fileInput = document.getElementById('file');
+      const progressBar = document.getElementById('progressBar');
+      const progressFill = document.getElementById('progressFill');
+
+      let allVideos = [];
+      let viewMode = 'single';
+      let editMode = false;
+      let activeTags = new Set();
+      let selectedFormTags = new Set();
+
+      const TAG_COLORS = {
+        longevity: 'tag-longevity',
+        design: 'tag-design',
+        society: 'tag-society',
+        service: 'tag-service',
+        system: 'tag-system',
+        technology: 'tag-technology'
+      };
+
+      tagPillsEl.addEventListener('click', (e) => {
+        const pill = e.target.closest('.tag-pill');
+        if (!pill) return;
+        const tag = pill.dataset.tag;
+        if (selectedFormTags.has(tag)) {
+          selectedFormTags.delete(tag);
+          pill.classList.remove('selected');
+        } else {
+          selectedFormTags.add(tag);
+          pill.classList.add('selected');
+        }
+      });
+
+      function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+
+      function countWords(text) {
+        return text.trim().split(/\s+/).filter(Boolean).length;
+      }
+
+      function formatTime(val) {
+        if (!val) return '';
+        const [h, m] = val.split(':');
+        const hour = parseInt(h, 10);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const h12 = hour % 12 || 12;
+        return h12 + ':' + m + ' ' + ampm;
+      }
+
+      function formatDate(val) {
+        if (!val) return '';
+        return val;
+      }
+
+      insightEl.addEventListener('input', () => {
+        const wc = countWords(insightEl.value);
+        wordCountEl.textContent = `(${wc} / 350 words)`;
+        wordCountEl.style.color = wc > 350 ? '#f87171' : '';
+      });
+
+      btnEdit.addEventListener('click', () => {
+        editMode = !editMode;
+        editPanel.classList.toggle('open', editMode);
+        btnEdit.classList.toggle('active', editMode);
+        renderWall();
+      });
+
+      btnPreview.addEventListener('click', () => {
+        viewMode = 'single';
+        btnPreview.classList.add('active');
+        btnGrid.classList.remove('active');
+        renderWall();
+      });
+
+      btnGrid.addEventListener('click', () => {
+        viewMode = 'grid';
+        btnGrid.classList.add('active');
+        btnPreview.classList.remove('active');
+        renderWall();
+      });
+
+      btnRefresh.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to reset the wall? This will delete ALL videos permanently.')) return;
+        try {
+          statusEl.textContent = 'Deleting videos...';
+          
+          const { data: files } = await supabase.storage.from('videos').list();
+          if (files) {
+            const filesToRemove = files.map(f => f.name);
+            await supabase.storage.from('videos').remove(filesToRemove);
+          }
+          
+          await supabase.from('videos').delete().neq('id', 0);
+          
+          await loadWall();
+          statusEl.textContent = 'Wall reset successfully.';
+          setTimeout(() => statusEl.textContent = '', 3000);
+        } catch (err) {
+          statusEl.textContent = 'Reset failed: ' + err.message;
+        }
+      });
+
+      btnExport.addEventListener('click', async () => {
+        try {
+          if (allVideos.length === 0) {
+            alert('No videos to export.');
+            return;
+          }
+
+          const csvRows = [
+            ['ID', 'Filename', 'Time', 'Date', 'Location', 'Tags', 'Insight', 'Video URL', 'Created At'].join(',')
+          ];
+
+          for (const video of allVideos) {
+            const row = [
+              video.id,
+              video.filename || '',
+              video.time || '',
+              video.date || '',
+              video.location || '',
+              video.tags || '',
+              (video.insight || '').replace(/"/g, '""'),
+              video.video_url || '',
+              video.created_at || ''
+            ];
+            csvRows.push(row.map(v => `"${v}"`).join(','));
+          }
+
+          const csvContent = csvRows.join('\n');
+          const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+          const csvUrl = URL.createObjectURL(csvBlob);
+          
+          const csvLink = document.createElement('a');
+          csvLink.href = csvUrl;
+          csvLink.download = `video-wall-export-${Date.now()}.csv`;
+          csvLink.click();
+          URL.revokeObjectURL(csvUrl);
+
+          statusEl.textContent = 'CSV exported successfully!';
+          setTimeout(() => statusEl.textContent = '', 3000);
+        } catch (err) {
+          alert('Export failed: ' + err.message);
+        }
+      });
+
+      filtersBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-tag]');
+        if (!btn) return;
+        const tag = btn.dataset.tag;
+
+        if (tag === 'all') {
+          activeTags.clear();
+          filtersBar.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          btnClearFilter.style.display = 'none';
+        } else {
+          filtersBar.querySelector('[data-tag="all"]').classList.remove('active');
+          btn.classList.toggle('active');
+          if (btn.classList.contains('active')) {
+            activeTags.add(tag);
+          } else {
+            activeTags.delete(tag);
+          }
+          if (activeTags.size === 0) {
+            filtersBar.querySelector('[data-tag="all"]').classList.add('active');
+            btnClearFilter.style.display = 'none';
+          } else {
+            btnClearFilter.style.display = '';
+          }
+        }
+        renderWall();
+      });
+
+      btnClearFilter.addEventListener('click', () => {
+        activeTags.clear();
+        filtersBar.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('active'));
+        filtersBar.querySelector('[data-tag="all"]').classList.add('active');
+        btnClearFilter.style.display = 'none';
+        renderWall();
+      });
+
+      function getFilteredVideos() {
+        let items = allVideos.slice().reverse();
+        if (activeTags.size > 0) {
+          items = items.filter(v => {
+            const vTags = v.tags ? v.tags.split(',') : [];
+            return [...activeTags].some(t => vTags.includes(t));
+          });
+        }
+        return items;
+      }
+
+      function renderWall() {
+        const items = getFilteredVideos();
+        if (items.length === 0) {
+          wallEl.className = '';
+          wallEl.innerHTML = '<div class="empty-state">No videos to show. Click "Upload" to add your first video!</div>';
+          return;
+        }
+
+        wallEl.className = viewMode === 'grid' ? 'wall-grid' : 'wall-single';
+
+        const isGrid = viewMode === 'grid';
+        wallEl.innerHTML = items.map(v => {
+          const vTags = v.tags ? v.tags.split(',') : [];
+          const tagsHtml = vTags.length > 0
+            ? '<div class="tags-row">' + vTags.map(t => `<span class="tag ${TAG_COLORS[t] || ''}">${esc(t)}</span>`).join('') + '</div>'
+            : '';
+
+          const metaParts = [];
+          if (v.time) metaParts.push(esc(formatTime(v.time)));
+          if (v.date) metaParts.push(esc(formatDate(v.date)));
+          if (v.location) metaParts.push(esc(v.location));
+          const metaLine = metaParts.length > 0
+            ? `<div class="meta-line">${metaParts.join(' &bull; ')}</div>`
+            : '';
+
+          const insightText = v.insight
+            ? `<div class="insight-text">${isGrid ? esc((v.insight || '').slice(0, 80) + ((v.insight || '').length > 80 ? '\u2026' : '')) : esc(v.insight)}</div>`
+            : '';
+
+          const deleteBtn = editMode
+            ? `<button class="btn-delete" onclick="deleteVideo(${v.id})">Delete</button>`
+            : '';
+
+          return `<div class="card">
+            <video src="${v.video_url}" ${isGrid ? '' : 'controls'} playsinline autoplay muted loop preload="metadata"></video>
+            <div class="meta">
+              ${tagsHtml}
+              ${metaLine}
+              ${insightText}
+              ${deleteBtn}
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      window.deleteVideo = async function(id) {
+        if (!confirm('Delete this video?')) return;
+        try {
+          const video = allVideos.find(v => v.id === id);
+          if (!video) return;
+          
+          const filename = video.video_url.split('/').pop();
+          await supabase.storage.from('videos').remove([filename]);
+          
+          await supabase.from('videos').delete().eq('id', id);
+          
+          await loadWall();
+          statusEl.textContent = 'Video deleted.';
+          setTimeout(() => statusEl.textContent = '', 3000);
+        } catch (err) {
+          alert('Failed to delete video: ' + err.message);
+        }
+      };
+
+      async function loadWall() {
+        try {
+          const { data, error } = await supabase
+            .from('videos')
+            .select('*')
+            .order('created_at', { ascending: true });
+          
+          if (error) throw error;
+          
+          allVideos = data || [];
+          renderWall();
+        } catch (err) {
+          console.error('Error loading videos:', err);
+          wallEl.className = '';
+          wallEl.innerHTML = '<div class="empty-state">Failed to load videos. Please refresh the page.</div>';
+        }
+      }
+
+      formEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = '';
+        progressBar.style.display = 'none';
+
+        const wc = countWords(insightEl.value);
+        if (wc > 350) {
+          statusEl.textContent = 'Insight exceeds 350 words.';
+          return;
+        }
+
+        const file = fileInput.files[0];
+        if (!file) {
+          statusEl.textContent = 'Please choose a video file.';
+          return;
+        }
+
+        if (file.size > 50 * 1024 * 1024) {
+          statusEl.textContent = 'Video must be under 50MB.';
+          return;
+        }
+
+        if (allVideos.length >= 20) {
+          statusEl.textContent = 'Maximum of 20 videos reached. Delete some videos first.';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        statusEl.textContent = 'Uploading video...';
+        progressBar.style.display = 'block';
+        progressFill.style.width = '0%';
+
+        try {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('videos')
+            .upload(fileName, file);
+
+          if (uploadError) throw uploadError;
+
+          progressFill.style.width = '100%';
+
+          const { data: urlData } = supabase.storage
+            .from('videos')
+            .getPublicUrl(fileName);
+
+          const { error: dbError } = await supabase
+            .from('videos')
+            .insert({
+              filename: file.name,
+              time: document.getElementById('time').value,
+              date: document.getElementById('date').value,
+              location: document.getElementById('location').value,
+              insight: insightEl.value,
+              tags: [...selectedFormTags].join(','),
+              video_url: urlData.publicUrl
+            });
+
+          if (dbError) throw dbError;
+
+          formEl.reset();
+          selectedFormTags.clear();
+          tagPillsEl.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('selected'));
+          wordCountEl.textContent = '(0 / 350 words)';
+          statusEl.textContent = 'Video uploaded successfully!';
+          progressBar.style.display = 'none';
+          
+          await loadWall();
+
+          setTimeout(() => statusEl.textContent = '', 3000);
+        } catch (err) {
+          statusEl.textContent = 'Upload failed: ' + err.message;
+          progressBar.style.display = 'none';
+          console.error('Upload error:', err);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      loadWall();
+    </script>
+  </body>
+</html>
