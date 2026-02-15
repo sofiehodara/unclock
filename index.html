@@ -1150,16 +1150,7 @@
           progressBar.style.display = 'none';
 
 
-// Show selected file status
-fileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    fileNameSpan.textContent = file.name;
-    fileStatus.style.display = 'block';
-  } else {
-    fileStatus.style.display = 'none';
-  }
-});
+
           
           // Reload wall with new video
           await loadWall();
@@ -1172,7 +1163,7 @@ fileInput.addEventListener('change', (e) => {
           submitBtn.disabled = false;
         }
       });
-      // Show selected file status
+   // Show selected file status
 fileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
