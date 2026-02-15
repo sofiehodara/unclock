@@ -7,6 +7,9 @@
     <meta name="description" content="A public video wall. Upload videos, filter by tags, switch views." />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+      /* ============================================================
+         CSS CUSTOM PROPERTIES (THEME COLORS)
+         ============================================================ */
       :root {
         --bg: #fff;
         --fg: #000;
@@ -29,6 +32,10 @@
         --tag-technology: #8adcdc;
         --tag-technology-bg: rgba(138,220,220,.15);
       }
+      
+      /* ============================================================
+         BASE STYLES
+         ============================================================ */
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { min-height: 100%; }
       body {
@@ -39,6 +46,9 @@
         line-height: 1.5;
       }
 
+      /* ============================================================
+         LAYOUT
+         ============================================================ */
       .wrap {
         max-width: 1100px;
         margin: 0 auto;
@@ -58,6 +68,9 @@
 
       h1 { font-size: 18px; font-weight: 600; letter-spacing: .15px; }
 
+      /* ============================================================
+         TOOLBAR & BUTTONS
+         ============================================================ */
       .toolbar {
         display: flex;
         flex-wrap: wrap;
@@ -131,6 +144,9 @@
       .pill-text.active { background: var(--fg); color: var(--bg);
   border-color: var(--fg); }
 
+      /* ============================================================
+         TAG FILTERS
+         ============================================================ */
       .filters {
         display: flex;
         flex-wrap: wrap;
@@ -149,6 +165,9 @@
       .filters .pill[data-tag="technology"] { background: var(--tag-technology-bg); color: var(--tag-technology); }
       .filters .pill[data-tag].active { outline: 1.5px solid currentColor; outline-offset: -1.5px; }
 
+      /* ============================================================
+         UPLOAD FORM
+         ============================================================ */
       .edit-panel {
         display: none;
         flex-direction: column;
@@ -312,6 +331,9 @@
         transition: width .3s;
       }
 
+      /* ============================================================
+         VIDEO WALL LAYOUTS
+         ============================================================ */
       .wall-single {
         display: flex;
         flex-direction: column;
@@ -350,6 +372,9 @@
 
 
 
+      /* ============================================================
+         VIDEO CARDS
+         ============================================================ */
       .card { padding: 0; }
 
       .card video {
@@ -402,6 +427,9 @@
       .wall-grid .card .tag { font-size: 8px; padding: 1px 6px; }
       .wall-grid .card .insight-text { font-size: 10px; }
 
+      /* ============================================================
+         UTILITY CLASSES
+         ============================================================ */
       .empty-state {
         padding: 24px 0;
         color: var(--muted2);
@@ -415,14 +443,21 @@
     </style>
   </head>
   <body>
+    <!-- Main container wrapper -->
     <div class="wrap">
+      
+      <!-- Header section with title and toolbar controls -->
       <div class="header-row">
         <h1>Unclock Photogrammetry Archive</h1>
+        
+        <!-- Toolbar with upload, sort, view, and export controls -->
         <div class="toolbar">
+          <!-- Upload toggle button -->
           <button class="pill-text" id="btnEdit">Add Video</button>
 
           <span class="toolbar-divider"></span>
 
+          <!-- View mode toggles: single column or grid -->
           <button class="icon-btn active" id="btnPreview" title="Single column">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <rect x="2" y="2" width="12" height="12" rx="1.5" />
@@ -436,6 +471,8 @@
               <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
             </svg>
           </button>
+          
+          <!-- Export to CSV button -->
           <button class="icon-btn" id="btnExport" title="Export CSV">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 2v8" />
@@ -443,6 +480,8 @@
               <path d="M2 13h12" />
             </svg>
           </button>
+          
+          <!-- Reset wall button (deletes all videos) -->
           <button class="icon-btn icon-btn-red" id="btnRefresh" title="Reset wall">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <path d="M3 3l10 10M13 3L3 13" />
@@ -451,31 +490,14 @@
         </div>
       </div>
 
+      <!-- Upload form panel (hidden by default) -->
       <div class="edit-panel" id="editPanel">
         <div class="separator"></div>
+        
+        <!-- Video upload form with metadata fields -->
         <form id="uploadForm" style="display:flex;flex-direction:column;gap:10px;">
-          <div>
-            <label for="file">Video file (max 50MB)</label>
-            <input class="file-input-hidden" id="file" name="file" type="file" accept="video/*" required />
-<label for="file" class="file-input-button">Choose Video File</label>
-
-          </div>
-          <div>
-            <label for="time">Time</label>
-            <input id="time" name="time" type="time" />
-          </div>
-          <div>
-            <label for="date">Date</label>
-            <input id="date" name="date" type="date" />
-          </div>
-          <div>
-            <label for="location">Location</label>
-            <input id="location" name="location" type="text" placeholder="e.g. Brooklyn" />
-          </div>
-          <div>
-            <label for="insight">Insight <span class="word-count" id="wordCount">(0 / 350 words)</span></label>
-            <textarea id="insight" name="insight" placeholder="What happened? What did you notice?"></textarea>
-          </div>
+          
+          <!-- Tags selection (allows multiple) -->
           <div>
             <label>Tags</label>
             <div class="tag-pills" id="tagPills">
@@ -487,17 +509,54 @@
               <button type="button" class="tag-pill" data-tag="technology">technology</button>
             </div>
           </div>
+          
+          <!-- File upload input (max 50MB) -->
+          <div>
+            <label for="file">Video file (max 50MB)</label>
+            <input class="file-input-hidden" id="file" name="file" type="file" accept="video/*" required />
+            <label for="file" class="file-input-button">Choose Video File</label>
+          </div>
+          
+          <!-- Time input -->
+          <div>
+            <label for="time">Time</label>
+            <input id="time" name="time" type="time" />
+          </div>
+          
+          <!-- Date input -->
+          <div>
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" />
+          </div>
+          
+          <!-- Location text input -->
+          <div>
+            <label for="location">Location</label>
+            <input id="location" name="location" type="text" placeholder="e.g. Brooklyn" />
+          </div>
+          
+          <!-- Insight textarea (350 word limit) -->
+          <div>
+            <label for="insight">Insight <span class="word-count" id="wordCount">(0 / 350 words)</span></label>
+            <textarea id="insight" name="insight" placeholder="What happened? What did you notice?"></textarea>
+          </div>
+          
+          <!-- Submit button and status message -->
           <div class="form-actions">
             <button class="btn-upload" id="submitBtn" type="submit">Upload</button>
             <span class="status-msg" id="status"></span>
           </div>
+          
+          <!-- Upload progress bar (hidden until uploading) -->
           <div class="progress-bar" id="progressBar" style="display:none;">
             <div class="progress-fill" id="progressFill"></div>
           </div>
         </form>
+        
         <div class="separator"></div>
       </div>
 
+      <!-- Tag filter pills for filtering displayed videos -->
       <div class="filters" id="filtersBar">
         <button class="pill active" data-tag="all">All</button>
         <button class="pill" data-tag="longevity">longevity</button>
@@ -509,15 +568,46 @@
         <button class="pill" id="btnClearFilter" style="display:none;">Clear filter</button>
       </div>
 
+      <!-- Video wall container (populated dynamically by JavaScript) -->
       <div id="wall"></div>
     </div>
 
     <script>
-      // Initialize 
-      const SUPABASE_URL = 'https://acjtqcvqoqlwstpurnnt.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjanRxY3Zxb3Fsd3N0cHVybm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTQ0MTksImV4cCI6MjA4NjU3MDQxOX0.ulDc5xjs68zAXaIfM8nP1tWyobRKaI61FBf1IPrhyXM';
+      // ============================================================
+      // CONFIGURATION CONSTANTS
+      // ============================================================
       
-      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const CONFIG = {
+        // Supabase connection
+        SUPABASE_URL: 'https://acjtqcvqoqlwstpurnnt.supabase.co',
+        SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjanRxY3Zxb3Fsd3N0cHVybm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTQ0MTksImV4cCI6MjA4NjU3MDQxOX0.ulDc5xjs68zAXaIfM8nP1tWyobRKaI61FBf1IPrhyXM',
+        
+        // Upload limits
+        MAX_VIDEO_SIZE_MB: 50,
+        MAX_VIDEO_SIZE_BYTES: 50 * 1024 * 1024,
+        MAX_VIDEOS: 20,
+        MAX_INSIGHT_WORDS: 350,
+        
+        // UI timing
+        STATUS_MESSAGE_DURATION: 3000, // milliseconds
+        
+        // Grid truncation
+        GRID_INSIGHT_TRUNCATE_LENGTH: 80
+      };
+      
+      // ============================================================
+      // INITIALIZE SUPABASE CLIENT
+      // ============================================================
+      
+      const supabaseClient = window.supabase.createClient(
+        CONFIG.SUPABASE_URL, 
+        CONFIG.SUPABASE_ANON_KEY
+      );
+      
+      // ============================================================
+      // DOM ELEMENT REFERENCES
+      // ============================================================
+      
       const wallEl = document.getElementById('wall');
       const formEl = document.getElementById('uploadForm');
       const statusEl = document.getElementById('status');
@@ -537,12 +627,17 @@
       const progressBar = document.getElementById('progressBar');
       const progressFill = document.getElementById('progressFill');
 
-      let allVideos = [];
-      let viewMode = 'single';
-      let editMode = false;
-      let activeTags = new Set();
-      let selectedFormTags = new Set();
+      // ============================================================
+      // APPLICATION STATE
+      // ============================================================
+      
+      let allVideos = [];              // All videos from database
+      let viewMode = 'single';         // 'single' or 'grid' view mode
+      let editMode = false;            // Whether edit panel is open
+      let activeTags = new Set();      // Currently active filter tags
+      let selectedFormTags = new Set(); // Tags selected in upload form
 
+      // Tag color mapping for visual consistency
       const TAG_COLORS = {
         longevity: 'tag-longevity',
         design: 'tag-design',
@@ -552,9 +647,291 @@
         technology: 'tag-technology'
       };
 
+      // ============================================================
+      // UTILITY FUNCTIONS
+      // ============================================================
+      
+      /**
+       * Escape HTML special characters to prevent XSS
+       * @param {string} s - String to escape
+       * @returns {string} Escaped string
+       */
+      function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+
+      /**
+       * Count words in text (used for insight character limit)
+       * @param {string} text - Text to count
+       * @returns {number} Word count
+       */
+      function countWords(text) {
+        return text.trim().split(/\s+/).filter(Boolean).length;
+      }
+
+      /**
+       * Format 24-hour time to 12-hour format with AM/PM
+       * @param {string} val - Time in HH:MM format
+       * @returns {string} Formatted time string
+       */
+      function formatTime(val) {
+        if (!val) return '';
+        const [h, m] = val.split(':');
+        const hour = parseInt(h, 10);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const h12 = hour % 12 || 12;
+        return h12 + ':' + m + ' ' + ampm;
+      }
+
+      /**
+       * Format date value (currently just returns as-is)
+       * @param {string} val - Date string
+       * @returns {string} Formatted date
+       */
+      function formatDate(val) {
+        if (!val) return '';
+        return val;
+      }
+
+      /**
+       * Show temporary status message
+       * @param {string} message - Message to display
+       * @param {number} duration - How long to show (milliseconds)
+       */
+      function showStatus(message, duration = CONFIG.STATUS_MESSAGE_DURATION) {
+        statusEl.textContent = message;
+        setTimeout(() => statusEl.textContent = '', duration);
+      }
+
+      // ============================================================
+      // VIDEO FILTERING LOGIC
+      // ============================================================
+      
+      /**
+       * Get filtered videos based on active tags
+       * @returns {Array} Filtered video array (newest first)
+       */
+      function getFilteredVideos() {
+        // Start with newest first (reverse chronological)
+        let items = allVideos.slice().reverse();
+        
+        // Apply tag filters if any tags are active
+        if (activeTags.size > 0) {
+          items = items.filter(v => {
+            const vTags = Array.isArray(v.tags) ? v.tags : [];
+            return [...activeTags].some(t => vTags.includes(t));
+          });
+        }
+        
+        return items;
+      }
+
+      // ============================================================
+      // RENDERING FUNCTIONS
+      // ============================================================
+      
+      /**
+       * Render the video wall based on current state
+       * Handles both grid and single column views
+       */
+      function renderWall() {
+        const items = getFilteredVideos();
+        
+        // Show empty state if no videos match filters
+        if (items.length === 0) {
+          wallEl.className = '';
+          wallEl.innerHTML = '<div class="empty-state">No videos to show. Click "Add Video" to upload your first video!</div>';
+          return;
+        }
+
+        // Set layout class based on view mode
+        wallEl.className = viewMode === 'grid' ? 'wall-grid' : 'wall-single';
+        const isGrid = viewMode === 'grid';
+        
+        // Generate HTML for each video card
+        wallEl.innerHTML = items.map(v => {
+          const vTags = Array.isArray(v.tags) ? v.tags : [];
+          
+          // Build tags row
+          const tagsHtml = vTags.length > 0
+            ? '<div class="tags-row">' + vTags.map(t => 
+                `<span class="tag ${TAG_COLORS[t] || ''}">${esc(t)}</span>`
+              ).join('') + '</div>'
+            : '';
+
+          // Build metadata line (time • date • location)
+          const metaParts = [];
+          if (v.time) metaParts.push(esc(formatTime(v.time)));
+          if (v.date) metaParts.push(esc(formatDate(v.date)));
+          if (v.location) metaParts.push(esc(v.location));
+          const metaLine = metaParts.length > 0
+            ? `<div class="meta-line">${metaParts.join(' &bull; ')}</div>`
+            : '';
+
+          // Build insight text (truncated in grid view)
+          const insightText = v.insight
+            ? `<div class="insight-text">${
+                isGrid 
+                  ? esc((v.insight || '').slice(0, CONFIG.GRID_INSIGHT_TRUNCATE_LENGTH) + 
+                      ((v.insight || '').length > CONFIG.GRID_INSIGHT_TRUNCATE_LENGTH ? '\u2026' : ''))
+                  : esc(v.insight)
+              }</div>`
+            : '';
+
+          // Show delete button only in edit mode
+          const deleteBtn = editMode
+            ? `<button class="btn-delete" onclick="deleteVideo(${v.id})">Delete</button>`
+            : '';
+
+          return `<div class="card">
+            <video src="${v.video_url}" ${isGrid ? '' : 'controls'} playsinline autoplay muted loop preload="metadata"></video>
+            <div class="meta">
+              ${tagsHtml}
+              ${metaLine}
+              ${insightText}
+              ${deleteBtn}
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // ============================================================
+      // DATA MANAGEMENT FUNCTIONS
+      // ============================================================
+      
+      /**
+       * Load all videos from database and render wall
+       * Called on page load and after uploads/deletes
+       */
+      async function loadWall() {
+        try {
+          const { data, error } = await supabaseClient
+            .from('videos')
+            .select('*')
+            .order('created_at', { ascending: true });
+          
+          if (error) throw error;
+          
+          allVideos = data || [];
+          renderWall();
+        } catch (err) {
+          console.error('Error loading videos:', err);
+          wallEl.className = '';
+          wallEl.innerHTML = '<div class="empty-state">Failed to load videos. Please refresh the page.</div>';
+        }
+      }
+
+      /**
+       * Delete a video (both from storage and database)
+       * @param {number} id - Video ID to delete
+       */
+      window.deleteVideo = async function(id) {
+        if (!confirm('Delete this video?')) return;
+        
+        try {
+          const video = allVideos.find(v => v.id === id);
+          if (!video) return;
+          
+          // Extract filename from URL and delete from storage
+          const filename = video.video_url.split('/').pop();
+          await supabaseClient.storage.from('videos').remove([filename]);
+          
+          // Delete database record
+          await supabaseClient.from('videos').delete().eq('id', id);
+          
+          await loadWall();
+          showStatus('Video deleted.');
+        } catch (err) {
+          alert('Failed to delete video: ' + err.message);
+        }
+      };
+
+      /**
+       * Reset the entire wall (delete all videos)
+       * Used by the reset button
+       */
+      async function resetWall() {
+        if (!confirm('Are you sure you want to reset the wall? This will delete ALL videos permanently.')) {
+          return;
+        }
+        
+        try {
+          statusEl.textContent = 'Deleting videos...';
+          
+          // Delete all files from storage
+          const { data: files } = await supabaseClient.storage.from('videos').list();
+          if (files) {
+            const filesToRemove = files.map(f => f.name);
+            await supabaseClient.storage.from('videos').remove(filesToRemove);
+          }
+          
+          // Delete all database records
+          await supabaseClient.from('videos').delete().neq('id', 0);
+          
+          await loadWall();
+          showStatus('Wall reset successfully.');
+        } catch (err) {
+          statusEl.textContent = 'Reset failed: ' + err.message;
+        }
+      }
+
+      /**
+       * Export all videos to CSV file
+       * Generates downloadable CSV with all video metadata
+       */
+      async function exportToCSV() {
+        try {
+          if (allVideos.length === 0) {
+            alert('No videos to export.');
+            return;
+          }
+
+          // Build CSV header
+          const csvRows = [
+            ['ID', 'Filename', 'Time', 'Date', 'Location', 'Tags', 'Insight', 'Video URL', 'Created At'].join(',')
+          ];
+
+          // Add each video as a row
+          for (const video of allVideos) {
+            const row = [
+              video.id,
+              video.filename || '',
+              video.time || '',
+              video.date || '',
+              video.location || '',
+              video.tags || '',
+              (video.insight || '').replace(/"/g, '""'), // Escape quotes in insight
+              video.video_url || '',
+              video.created_at || ''
+            ];
+            csvRows.push(row.map(v => `"${v}"`).join(','));
+          }
+
+          // Create blob and trigger download
+          const csvContent = csvRows.join('\n');
+          const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+          const csvUrl = URL.createObjectURL(csvBlob);
+          
+          const csvLink = document.createElement('a');
+          csvLink.href = csvUrl;
+          csvLink.download = `video-wall-export-${Date.now()}.csv`;
+          csvLink.click();
+          URL.revokeObjectURL(csvUrl);
+
+          showStatus('CSV exported successfully!');
+        } catch (err) {
+          alert('Export failed: ' + err.message);
+        }
+      }
+
+      // ============================================================
+      // EVENT LISTENERS - TAG SELECTION IN FORM
+      // ============================================================
+      
       tagPillsEl.addEventListener('click', (e) => {
         const pill = e.target.closest('.tag-pill');
         if (!pill) return;
+        
         const tag = pill.dataset.tag;
         if (selectedFormTags.has(tag)) {
           selectedFormTags.delete(tag);
@@ -565,34 +942,20 @@
         }
       });
 
-      function esc(s) {
-        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      }
-
-      function countWords(text) {
-        return text.trim().split(/\s+/).filter(Boolean).length;
-      }
-
-      function formatTime(val) {
-        if (!val) return '';
-        const [h, m] = val.split(':');
-        const hour = parseInt(h, 10);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const h12 = hour % 12 || 12;
-        return h12 + ':' + m + ' ' + ampm;
-      }
-
-      function formatDate(val) {
-        if (!val) return '';
-        return val;
-      }
-
+      // ============================================================
+      // EVENT LISTENERS - WORD COUNT
+      // ============================================================
+      
       insightEl.addEventListener('input', () => {
         const wc = countWords(insightEl.value);
-        wordCountEl.textContent = `(${wc} / 350 words)`;
-        wordCountEl.style.color = wc > 350 ? '#f87171' : '';
+        wordCountEl.textContent = `(${wc} / ${CONFIG.MAX_INSIGHT_WORDS} words)`;
+        wordCountEl.style.color = wc > CONFIG.MAX_INSIGHT_WORDS ? '#f87171' : '';
       });
 
+      // ============================================================
+      // EVENT LISTENERS - VIEW CONTROLS
+      // ============================================================
+      
       btnEdit.addEventListener('click', () => {
         editMode = !editMode;
         editPanel.classList.toggle('open', editMode);
@@ -614,88 +977,36 @@
         renderWall();
       });
 
-      btnRefresh.addEventListener('click', async () => {
-        if (!confirm('Are you sure you want to reset the wall? This will delete ALL videos permanently.')) return;
-        try {
-          statusEl.textContent = 'Deleting videos...';
-          
-          const { data: files } = await supabaseClient.storage.from('videos').list();
-          if (files) {
-            const filesToRemove = files.map(f => f.name);
-            await supabaseClient.storage.from('videos').remove(filesToRemove);
-          }
-          
-          await supabaseClient.from('videos').delete().neq('id', 0);
-          
-          await loadWall();
-          statusEl.textContent = 'Wall reset successfully.';
-          setTimeout(() => statusEl.textContent = '', 3000);
-        } catch (err) {
-          statusEl.textContent = 'Reset failed: ' + err.message;
-        }
-      });
+      btnRefresh.addEventListener('click', resetWall);
+      btnExport.addEventListener('click', exportToCSV);
 
-      btnExport.addEventListener('click', async () => {
-        try {
-          if (allVideos.length === 0) {
-            alert('No videos to export.');
-            return;
-          }
-
-          const csvRows = [
-            ['ID', 'Filename', 'Time', 'Date', 'Location', 'Tags', 'Insight', 'Video URL', 'Created At'].join(',')
-          ];
-
-          for (const video of allVideos) {
-            const row = [
-              video.id,
-              video.filename || '',
-              video.time || '',
-              video.date || '',
-              video.location || '',
-              video.tags || '',
-              (video.insight || '').replace(/"/g, '""'),
-              video.video_url || '',
-              video.created_at || ''
-            ];
-            csvRows.push(row.map(v => `"${v}"`).join(','));
-          }
-
-          const csvContent = csvRows.join('\n');
-          const csvBlob = new Blob([csvContent], { type: 'text/csv' });
-          const csvUrl = URL.createObjectURL(csvBlob);
-          
-          const csvLink = document.createElement('a');
-          csvLink.href = csvUrl;
-          csvLink.download = `video-wall-export-${Date.now()}.csv`;
-          csvLink.click();
-          URL.revokeObjectURL(csvUrl);
-
-          statusEl.textContent = 'CSV exported successfully!';
-          setTimeout(() => statusEl.textContent = '', 3000);
-        } catch (err) {
-          alert('Export failed: ' + err.message);
-        }
-      });
-
+      // ============================================================
+      // EVENT LISTENERS - TAG FILTERS
+      // ============================================================
+      
       filtersBar.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-tag]');
         if (!btn) return;
         const tag = btn.dataset.tag;
 
         if (tag === 'all') {
+          // Clear all filters
           activeTags.clear();
           filtersBar.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           btnClearFilter.style.display = 'none';
         } else {
+          // Toggle individual tag filter
           filtersBar.querySelector('[data-tag="all"]').classList.remove('active');
           btn.classList.toggle('active');
+          
           if (btn.classList.contains('active')) {
             activeTags.add(tag);
           } else {
             activeTags.delete(tag);
           }
+          
+          // Show "Clear filter" button if any tags active
           if (activeTags.size === 0) {
             filtersBar.querySelector('[data-tag="all"]').classList.add('active');
             btnClearFilter.style.display = 'none';
@@ -714,132 +1025,49 @@
         renderWall();
       });
 
-      function getFilteredVideos() {
-        let items = allVideos.slice().reverse();
-        if (activeTags.size > 0) {
-          items = items.filter(v => {
-            const vTags = Array.isArray(v.tags) ? v.tags : [];
-            return [...activeTags].some(t => vTags.includes(t));
-          });
-        }
-        return items;
-      }
-
-      function renderWall() {
-        const items = getFilteredVideos();
-        if (items.length === 0) {
-          wallEl.className = '';
-          wallEl.innerHTML = '<div class="empty-state">No videos to show. Click "Upload" to add your first video!</div>';
-          return;
-        }
-
-        wallEl.className = viewMode === 'grid' ? 'wall-grid' : 'wall-single';
-
-        const isGrid = viewMode === 'grid';
-        wallEl.innerHTML = items.map(v => {
-          const vTags = Array.isArray(v.tags) ? v.tags : [];
-          const tagsHtml = vTags.length > 0
-            ? '<div class="tags-row">' + vTags.map(t => `<span class="tag ${TAG_COLORS[t] || ''}">${esc(t)}</span>`).join('') + '</div>'
-            : '';
-
-          const metaParts = [];
-          if (v.time) metaParts.push(esc(formatTime(v.time)));
-          if (v.date) metaParts.push(esc(formatDate(v.date)));
-          if (v.location) metaParts.push(esc(v.location));
-          const metaLine = metaParts.length > 0
-            ? `<div class="meta-line">${metaParts.join(' &bull; ')}</div>`
-            : '';
-
-          const insightText = v.insight
-            ? `<div class="insight-text">${isGrid ? esc((v.insight || '').slice(0, 80) + ((v.insight || '').length > 80 ? '\u2026' : '')) : esc(v.insight)}</div>`
-            : '';
-
-          const deleteBtn = editMode
-            ? `<button class="btn-delete" onclick="deleteVideo(${v.id})">Delete</button>`
-            : '';
-
-          return `<div class="card">
-            <video src="${v.video_url}" ${isGrid ? '' : 'controls'} playsinline autoplay muted loop preload="metadata"></video>
-            <div class="meta">
-              ${tagsHtml}
-              ${metaLine}
-              ${insightText}
-              ${deleteBtn}
-            </div>
-          </div>`;
-        }).join('');
-      }
-
-      window.deleteVideo = async function(id) {
-        if (!confirm('Delete this video?')) return;
-        try {
-          const video = allVideos.find(v => v.id === id);
-          if (!video) return;
-          
-          const filename = video.video_url.split('/').pop();
-          await supabaseClient.storage.from('videos').remove([filename]);
-          
-          await supabaseClient.from('videos').delete().eq('id', id);
-          
-          await loadWall();
-          statusEl.textContent = 'Video deleted.';
-          setTimeout(() => statusEl.textContent = '', 3000);
-        } catch (err) {
-          alert('Failed to delete video: ' + err.message);
-        }
-      };
-
-      async function loadWall() {
-        try {
-          const { data, error } = await supabaseClient
-            .from('videos')
-            .select('*')
-            .order('created_at', { ascending: true });
-          
-          if (error) throw error;
-          
-          allVideos = data || [];
-          renderWall();
-        } catch (err) {
-          console.error('Error loading videos:', err);
-          wallEl.className = '';
-          wallEl.innerHTML = '<div class="empty-state">Failed to load videos. Please refresh the page.</div>';
-        }
-      }
-
+      // ============================================================
+      // EVENT LISTENERS - FORM SUBMISSION
+      // ============================================================
+      
       formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         statusEl.textContent = '';
         progressBar.style.display = 'none';
 
+        // Validate word count
         const wc = countWords(insightEl.value);
-        if (wc > 350) {
-          statusEl.textContent = 'Insight exceeds 350 words.';
+        if (wc > CONFIG.MAX_INSIGHT_WORDS) {
+          statusEl.textContent = `Insight exceeds ${CONFIG.MAX_INSIGHT_WORDS} words.`;
           return;
         }
 
+        // Validate file selection
         const file = fileInput.files[0];
         if (!file) {
           statusEl.textContent = 'Please choose a video file.';
           return;
         }
 
-        if (file.size > 50 * 1024 * 1024) {
-          statusEl.textContent = 'Video must be under 50MB.';
+        // Validate file size
+        if (file.size > CONFIG.MAX_VIDEO_SIZE_BYTES) {
+          statusEl.textContent = `Video must be under ${CONFIG.MAX_VIDEO_SIZE_MB}MB.`;
           return;
         }
 
-        if (allVideos.length >= 20) {
-          statusEl.textContent = 'Maximum of 20 videos reached. Delete some videos first.';
+        // Check video limit
+        if (allVideos.length >= CONFIG.MAX_VIDEOS) {
+          statusEl.textContent = `Maximum of ${CONFIG.MAX_VIDEOS} videos reached. Delete some videos first.`;
           return;
         }
 
+        // Start upload
         submitBtn.disabled = true;
         statusEl.textContent = 'Uploading video...';
         progressBar.style.display = 'block';
         progressFill.style.width = '0%';
 
         try {
+          // Upload file to Supabase storage
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}.${fileExt}`;
           
@@ -851,10 +1079,12 @@
 
           progressFill.style.width = '100%';
 
+          // Get public URL for the uploaded file
           const { data: urlData } = supabaseClient.storage
             .from('videos')
             .getPublicUrl(fileName);
 
+          // Save metadata to database
           const { error: dbError } = await supabaseClient
             .from('videos')
             .insert({
@@ -869,16 +1099,16 @@
 
           if (dbError) throw dbError;
 
+          // Reset form
           formEl.reset();
           selectedFormTags.clear();
           tagPillsEl.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('selected'));
-          wordCountEl.textContent = '(0 / 350 words)';
-          statusEl.textContent = 'Video uploaded successfully!';
+          wordCountEl.textContent = `(0 / ${CONFIG.MAX_INSIGHT_WORDS} words)`;
           progressBar.style.display = 'none';
           
+          // Reload wall with new video
           await loadWall();
-
-          setTimeout(() => statusEl.textContent = '', 3000);
+          showStatus('Video uploaded successfully!');
         } catch (err) {
           statusEl.textContent = 'Upload failed: ' + err.message;
           progressBar.style.display = 'none';
@@ -888,6 +1118,11 @@
         }
       });
 
+      // ============================================================
+      // INITIALIZATION
+      // ============================================================
+      
+      // Load videos when page loads
       loadWall();
     </script>
   </body>
