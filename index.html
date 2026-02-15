@@ -653,7 +653,6 @@
         <button class="pill" data-tag="service">service</button>
         <button class="pill" data-tag="system">system</button>
         <button class="pill" data-tag="technology">technology</button>
-        <button class="pill" id="btnClearFilter" style="display:none;">Clear filter</button>
       </div>
 
       <!-- Video wall container (populated dynamically by JavaScript) -->
@@ -707,7 +706,6 @@
       const btnRefresh = document.getElementById('btnRefresh');
       const btnExport = document.getElementById('btnExport');
       const filtersBar = document.getElementById('filtersBar');
-      const btnClearFilter = document.getElementById('btnClearFilter');
       const insightEl = document.getElementById('insight');
       const wordCountEl = document.getElementById('wordCount');
       const tagPillsEl = document.getElementById('tagPills');
@@ -1088,23 +1086,12 @@
           activeTags.delete(tag);
         }
         
-        // Show "Clear filter" button if any tags active
-        if (activeTags.size === 0) {
-          btnClearFilter.style.display = 'none';
-        } else {
-          btnClearFilter.style.display = '';
-        }
+ 
         
         renderWall();
       });
 
-      btnClearFilter.addEventListener('click', () => {
-        activeTags.clear();
-        filtersBar.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('active'));
-        filtersBar.querySelector('[data-tag="all"]').classList.add('active');
-        btnClearFilter.style.display = 'none';
-        renderWall();
-      });
+     
 
       // ============================================================
       // EVENT LISTENERS - FORM SUBMISSION
