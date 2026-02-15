@@ -1070,36 +1070,27 @@
       // EVENT LISTENERS - TAG FILTERS
       // ============================================================
       
-      filtersBar.addEventListener('click', (e) => {
+     filtersBar.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-tag]');
         if (!btn) return;
         const tag = btn.dataset.tag;
 
-        if (tag === 'all') {
-          // Clear all filters
-          activeTags.clear();
-          filtersBar.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+        // Toggle individual tag filter
+        btn.classList.toggle('active');
+        
+        if (btn.classList.contains('active')) {
+          activeTags.add(tag);
+        } else {
+          activeTags.delete(tag);
+        }
+        
+        // Show "Clear filter" button if any tags active
+        if (activeTags.size === 0) {
           btnClearFilter.style.display = 'none';
         } else {
-          // Toggle individual tag filter
-          filtersBar.querySelector('[data-tag="all"]').classList.remove('active');
-          btn.classList.toggle('active');
-          
-          if (btn.classList.contains('active')) {
-            activeTags.add(tag);
-          } else {
-            activeTags.delete(tag);
-          }
-          
-          // Show "Clear filter" button if any tags active
-          if (activeTags.size === 0) {
-            filtersBar.querySelector('[data-tag="all"]').classList.add('active');
-            btnClearFilter.style.display = 'none';
-          } else {
-            btnClearFilter.style.display = '';
-          }
+          btnClearFilter.style.display = '';
         }
+        
         renderWall();
       });
 
