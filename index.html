@@ -645,7 +645,7 @@
         let items = allVideos.slice().reverse();
         if (activeTags.size > 0) {
           items = items.filter(v => {
-            const vTags = v.tags ? v.tags.split(',') : [];
+            const vTags = Array.isArray(v.tags) ? v.tags : [];
             return [...activeTags].some(t => vTags.includes(t));
           });
         }
@@ -664,7 +664,7 @@
 
         const isGrid = viewMode === 'grid';
         wallEl.innerHTML = items.map(v => {
-          const vTags = v.tags ? v.tags.split(',') : [];
+          const vTags = Array.isArray(v.tags) ? v.tags : [];
           const tagsHtml = vTags.length > 0
             ? '<div class="tags-row">' + vTags.map(t => `<span class="tag ${TAG_COLORS[t] || ''}">${esc(t)}</span>`).join('') + '</div>'
             : '';
@@ -790,7 +790,7 @@
               date: document.getElementById('date').value,
               location: document.getElementById('location').value,
               insight: insightEl.value,
-              tags: selectedFormTags.size > 0 ? [...selectedFormTags].join(',') : null,
+              tags: [...selectedFormTags],
               video_url: urlData.publicUrl
             });
 
