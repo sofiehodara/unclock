@@ -666,6 +666,8 @@
       const fileInput = document.getElementById('file');
       const progressBar = document.getElementById('progressBar');
       const progressFill = document.getElementById('progressFill');
+      const fileStatus = document.getElementById('fileStatus');
+      const fileNameSpan = document.getElementById('fileName');
 
       // ============================================================
       // APPLICATION STATE
@@ -1144,7 +1146,20 @@
           selectedFormTags.clear();
           tagPillsEl.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('selected'));
           wordCountEl.textContent = `(0 / ${CONFIG.MAX_INSIGHT_WORDS} words)`;
+          fileStatus.style.display = 'none';
           progressBar.style.display = 'none';
+
+
+// Show selected file status
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    fileNameSpan.textContent = file.name;
+    fileStatus.style.display = 'block';
+  } else {
+    fileStatus.style.display = 'none';
+  }
+});
           
           // Reload wall with new video
           await loadWall();
