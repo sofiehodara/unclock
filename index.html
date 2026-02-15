@@ -19,18 +19,18 @@
         --focus: rgba(0,0,0,.25);
         --pill: rgba(0,0,0,.08);
         --pill-active: rgba(0,0,0,.18);
-        --tag-longevity: #8ecda0;
-        --tag-longevity-bg: rgba(142,205,160,.15);
-        --tag-design: #8ab4f8;
-        --tag-design-bg: rgba(138,180,248,.15);
-        --tag-society: #f0c68a;
-        --tag-society-bg: rgba(240,198,138,.15);
-        --tag-service: #c4a6e8;
-        --tag-service-bg: rgba(196,166,232,.15);
-        --tag-system: #f0a0a0;
-        --tag-system-bg: rgba(240,160,160,.15);
-        --tag-technology: #8adcdc;
-        --tag-technology-bg: rgba(138,220,220,.15);
+        --tag-longevity: #2d8659;
+        --tag-longevity-bg: rgba(45,134,89,.15);
+        --tag-design: #1a73e8;
+        --tag-design-bg: rgba(26,115,232,.15);
+        --tag-society: #d97706;
+        --tag-society-bg: rgba(217,119,6,.15);
+        --tag-service: #7c3aed;
+        --tag-service-bg: rgba(124,58,237,.15);
+        --tag-system: #dc2626;
+        --tag-system-bg: rgba(220,38,38,.15);
+        --tag-technology: #0891b2;
+        --tag-technology-bg: rgba(8,145,178,.15);
       }
       
       /* ============================================================
@@ -222,23 +222,25 @@
 
 .file-input-button {
   display: inline-block;
-  padding: 12px 20px;
+  appearance: none;
+  border: 2px solid var(--fg);
   background: var(--fg);
   color: var(--bg);
-  border: 2px solid var(--fg);
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 14px 32px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .5px;
   cursor: pointer;
-  text-transform: none;
-  letter-spacing: 0;
-  margin-top: 0;
-  min-height: 44px;
+  text-transform: uppercase;
   transition: all .15s;
+  min-height: 44px;
+  text-align: center;
 }
 
 .file-input-button:hover {
   background: var(--muted);
+  transform: translateY(-1px);
 }
 
 
@@ -249,30 +251,43 @@
       }
       .tag-pill {
         appearance: none;
-        border: none;
+        border: 1.5px solid currentColor;
+        background: transparent;
         border-radius: 999px;
         padding: 5px 14px;
         font-size: 12px;
         cursor: pointer;
-        transition: background .15s, color .15s;
+        transition: all .15s;
         font-weight: 500;
       }
-      .tag-pill[data-tag="longevity"] { background: var(--tag-longevity-bg); color: var(--tag-longevity); }
-      .tag-pill[data-tag="design"] { background: var(--tag-design-bg); color: var(--tag-design); }
-      .tag-pill[data-tag="society"] { background: var(--tag-society-bg); color: var(--tag-society); }
-      .tag-pill[data-tag="service"] { background: var(--tag-service-bg); color: var(--tag-service); }
-      .tag-pill[data-tag="system"] { background: var(--tag-system-bg); color: var(--tag-system); }
-      .tag-pill[data-tag="technology"] { background: var(--tag-technology-bg); color: var(--tag-technology); }
-      .tag-pill.selected {
-        outline: 1.5px solid currentColor;
-        outline-offset: -1.5px;
+      .tag-pill[data-tag="longevity"] { color: var(--tag-longevity); }
+      .tag-pill[data-tag="design"] { color: var(--tag-design); }
+      .tag-pill[data-tag="society"] { color: var(--tag-society); }
+      .tag-pill[data-tag="service"] { color: var(--tag-service); }
+      .tag-pill[data-tag="system"] { color: var(--tag-system); }
+      .tag-pill[data-tag="technology"] { color: var(--tag-technology); }
+      .tag-pill:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
       }
+      .tag-pill.selected {
+        background: currentColor;
+        color: white;
+        border-color: currentColor;
+      }
+      .tag-pill[data-tag="longevity"].selected { background: var(--tag-longevity); }
+      .tag-pill[data-tag="design"].selected { background: var(--tag-design); }
+      .tag-pill[data-tag="society"].selected { background: var(--tag-society); }
+      .tag-pill[data-tag="service"].selected { background: var(--tag-service); }
+      .tag-pill[data-tag="system"].selected { background: var(--tag-system); }
+      .tag-pill[data-tag="technology"].selected { background: var(--tag-technology); }
 
       .form-actions {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 10px;
+        margin-top: 10px;
       }
 .btn-upload {
   appearance: none;
@@ -314,6 +329,8 @@
       .status-msg {
         font-size: 12px;
         color: var(--muted);
+        text-align: center;
+        width: 100%;
       }
 
       .progress-bar {
@@ -495,7 +512,7 @@
         <div class="separator"></div>
         
         <!-- Video upload form with metadata fields -->
-        <form id="uploadForm" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="uploadForm" style="display:flex;flex-direction:column;gap:18px;">
           
           <!-- Tags selection (allows multiple) -->
           <div>
