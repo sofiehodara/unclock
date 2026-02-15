@@ -146,7 +146,31 @@
       .pill-text:hover { background: var(--pill-active); color: var(--fg); }
       .pill-text.active { background: var(--fg); color: var(--bg);
   border-color: var(--fg); }
+/* Improve ghost button contrast */
+.pill-text,
+.file-input-button,
+.tag-pill,
+.filters .pill {
+  border-color: rgba(0,0,0,.6);
+}
 
+/* Strong focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
       /* ============================================================
          TAG FILTERS
          ============================================================ */
