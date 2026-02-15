@@ -159,14 +159,35 @@
       .edit-panel.open ~ .filters {
   display: none;
 }
-      .filters .pill { font-size: 11px; padding: 5px 12px; font-weight: 500; }
-      .filters .pill[data-tag="longevity"] { background: var(--tag-longevity-bg); color: var(--tag-longevity); }
-      .filters .pill[data-tag="design"] { background: var(--tag-design-bg); color: var(--tag-design); }
-      .filters .pill[data-tag="society"] { background: var(--tag-society-bg); color: var(--tag-society); }
-      .filters .pill[data-tag="service"] { background: var(--tag-service-bg); color: var(--tag-service); }
-      .filters .pill[data-tag="system"] { background: var(--tag-system-bg); color: var(--tag-system); }
-      .filters .pill[data-tag="technology"] { background: var(--tag-technology-bg); color: var(--tag-technology); }
-      .filters .pill[data-tag].active { outline: 1.5px solid currentColor; outline-offset: -1.5px; }
+      .filters .pill { 
+        font-size: 11px; 
+        padding: 5px 12px; 
+        font-weight: 500;
+        border: 1.5px solid currentColor;
+        background: transparent;
+        transition: all .15s;
+      }
+      .filters .pill[data-tag="longevity"] { color: var(--tag-longevity); }
+      .filters .pill[data-tag="design"] { color: var(--tag-design); }
+      .filters .pill[data-tag="society"] { color: var(--tag-society); }
+      .filters .pill[data-tag="service"] { color: var(--tag-service); }
+      .filters .pill[data-tag="system"] { color: var(--tag-system); }
+      .filters .pill[data-tag="technology"] { color: var(--tag-technology); }
+      .filters .pill:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+      }
+      .filters .pill[data-tag].active { 
+        background: currentColor;
+        color: white;
+        border-color: currentColor;
+      }
+      .filters .pill[data-tag="longevity"].active { background: var(--tag-longevity); }
+      .filters .pill[data-tag="design"].active { background: var(--tag-design); }
+      .filters .pill[data-tag="society"].active { background: var(--tag-society); }
+      .filters .pill[data-tag="service"].active { background: var(--tag-service); }
+      .filters .pill[data-tag="system"].active { background: var(--tag-system); }
+      .filters .pill[data-tag="technology"].active { background: var(--tag-technology); }
 
       /* ============================================================
          UPLOAD FORM
