@@ -109,11 +109,12 @@
       .pill:hover { background: var(--pill-active); color: var(--fg); }
       .pill.active { background: var(--pill-active); color: var(--fg); }
 
+  
       .pill-text {
         appearance: none;
-        border: 1px solid var(--border);
-  background: var(--pill);
-  color: var(--fg);
+        border: 1px solid var(--muted2);
+        background: transparent;
+        color: var(--muted);
         border-radius: 999px;
         padding: 6px 14px;
         font-size: 12px;
@@ -121,7 +122,8 @@
         transition: background .15s, color .15s;
       }
       .pill-text:hover { background: var(--pill-active); color: var(--fg); }
-      .pill-text.active { background: var(--pill-active); color: var(--fg); }
+      .pill-text.active { background: var(--fg); color: var(--bg);
+  border-color: var(--fg); }
 
       .filters {
         display: flex;
