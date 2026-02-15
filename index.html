@@ -790,7 +790,7 @@
               date: document.getElementById('date').value,
               location: document.getElementById('location').value,
               insight: insightEl.value,
-              tags: [...selectedFormTags].join(','),
+              tags: selectedFormTags.size > 0 ? [...selectedFormTags].join(',') : null,
               video_url: urlData.publicUrl
             });
 
