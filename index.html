@@ -129,7 +129,7 @@
       .pill.active { background: var(--pill-active); color: var(--fg); }
 
   
-      .pill-text {
+  .pill-text {
   appearance: none;
   border: 1px solid var(--muted2);
   background: transparent;
@@ -139,6 +139,9 @@
   font-size: 12px;
   cursor: pointer;
   transition: background .15s, color .15s;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
 }
       .pill-text:hover { background: var(--pill-active); color: var(--fg); }
       .pill-text.active { background: var(--fg); color: var(--bg);
