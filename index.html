@@ -246,7 +246,16 @@
   border-color: var(--fg);
   color: var(--fg);
 }
+.file-status {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
 
+.file-status span {
+  color: var(--fg);
+  font-weight: 500;
+}
 
       .tag-pills {
         display: flex;
@@ -543,7 +552,9 @@
           <div>
             <label for="file">Video file (max 50MB)</label>
             <input class="file-input-hidden" id="file" name="file" type="file" accept="video/*" required />
-            <label for="file" class="file-input-button">Choose Video File</label>
+          <label for="file" class="file-input-button">Choose Video File</label>
+<div class="file-status" id="fileStatus" style="display:none;">Ready to upload: <span id="fileName"></span></div>
+
           </div>
           
           <!-- Time input -->
@@ -1146,6 +1157,16 @@
           submitBtn.disabled = false;
         }
       });
+      // Show selected file status
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    fileNameSpan.textContent = file.name;
+    fileStatus.style.display = 'block';
+  } else {
+    fileStatus.style.display = 'none';
+  }
+});
 
       // ============================================================
       // INITIALIZATION
