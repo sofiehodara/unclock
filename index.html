@@ -227,8 +227,8 @@
   display: inline-block;
   appearance: none;
   border: 2px solid var(--fg);
-  background: var(--fg);
-  color: var(--bg);
+  background: transparent;
+  color: var(--fg);
   border-radius: 8px;
   padding: 14px 32px;
   font-size: 15px;
@@ -242,8 +242,9 @@
 }
 
 .file-input-button:hover {
-  background: var(--muted);
-  transform: translateY(-1px);
+  background: var(--pill-active);
+  border-color: var(--fg);
+  color: var(--fg);
 }
 
 
@@ -308,9 +309,17 @@
   text-transform: uppercase;
 }
 
-.btn-upload:disabled { opacity: .5; cursor: default; }
-.btn-upload:hover:not(:disabled) { background: rgba(255,255,255,.9); transform: translateY(-1px); }
+.btn-upload:disabled { 
+  opacity: .5; 
+  cursor: default; 
+}
 
+.btn-upload:hover:not(:disabled) { 
+  background: var(--muted);
+  color: var(--bg);
+  border-color: var(--fg);
+  transform: translateY(-1px); 
+}
       .btn-delete {
         appearance: none;
         border: 1px solid rgba(255,80,80,.25);
