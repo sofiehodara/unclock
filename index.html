@@ -634,7 +634,7 @@ textarea:focus-visible {
           
           <!-- File upload input (max 50MB) -->
           <div>
-            <label for="file">Video file (max 50MB)</label>
+            <label for="file">Video file (max 100MB)</label>
             <input class="file-input-hidden" id="file" name="file" type="file" accept="video/*" required />
             <label for="file" class="file-input-button"> 
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -718,9 +718,9 @@ textarea:focus-visible {
         SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjanRxY3Zxb3Fsd3N0cHVybm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTQ0MTksImV4cCI6MjA4NjU3MDQxOX0.ulDc5xjs68zAXaIfM8nP1tWyobRKaI61FBf1IPrhyXM',
         
         // Upload limits
-        MAX_VIDEO_SIZE_MB: 50,
-        MAX_VIDEO_SIZE_BYTES: 50 * 1024 * 1024,
-        MAX_VIDEOS: 20,
+        MAX_VIDEO_SIZE_MB: 100,
+        MAX_VIDEO_SIZE_BYTES: 100 * 1024 * 1024,
+        MAX_VIDEOS: 50,
         MAX_INSIGHT_WORDS: 350,
         
         // UI timing
